@@ -1,6 +1,3 @@
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dm4bem/model-steady-state-smart-public/HEAD)
-
-
 import pandas as pd
 from dm4bem import read_epw
 
