@@ -1,3 +1,5 @@
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dm4bem/model-steady-state-smart-public/HEAD)
+
 # Steady State Model Project Team Smart
 
 The objective of this project is to design and study the thermal network of a building.
