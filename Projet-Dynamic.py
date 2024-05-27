@@ -340,6 +340,9 @@ y[[1]] = 1
 y[[2]] = 1               # nodes (temperatures) of interest
 pd.DataFrame(y, index=θ)
 
+q_1 = [f'q{i}' for i in range(nq)]
+θ_1 = [f'θ{j}' for j in range(nθ)]
+
 A_pd = pd.DataFrame(A, index=q, columns=θ)
 G_pd = pd.Series(G, index=q)
 C_pd = pd.Series(C, index=θ)
