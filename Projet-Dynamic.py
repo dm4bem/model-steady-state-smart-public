@@ -313,26 +313,26 @@ indoor_air = [0,1,2]   # indoor air temperature nodes
 controller = range(41,44)  # controller branches
 
 
-#results
+#results in steady state
 # ==================
 print(f"Maximum value of conductance: {np.max(G):.0f} W/K")
 
-b[controller] = 20, 20, 22  # °C setpoint temperature of the rooms
-G[controller] = 1e12 # Kp-controller gain
+b[controller] = 20, 20, 20  # °C setpoint temperature of the rooms
+G[controller] = 0 # Kp-controller gain
   
 θ = np.linalg.inv(A.T @ np.diag(G) @ A) @ (A.T @ np.diag(G) @ b  )
 
 q = np.diag(G) @ (-A @ θ + b)
 
-print("To =",To)
-print("1. All 4 rooms controlled")
+print("To =",To,'°C')
+print("All 3 rooms controlled")
 
 print("θ:", θ[indoor_air], "°C")
 
 print("q:", q[controller], "W") 
 
 
-# thermal circuit
+# state-space representation
 
 y = np.zeros(A.shape[1])        # nodes
 y[[0]] = 1
@@ -343,25 +343,31 @@ pd.DataFrame(y, index=θ)
 q_1 = [f'q{i}' for i in range(nq)]
 θ_1 = [f'θ{j}' for j in range(nθ)]
 
-A_pd = pd.DataFrame(A, index=q, columns=θ)
-G_pd = pd.Series(G, index=q)
-C_pd = pd.Series(C, index=θ)
-b_pd = pd.Series(b, index=q)
-f_pd = pd.Series(f, index=θ)
-y_pd = pd.Series(y, index=θ)
+A_pd = pd.DataFrame(A, index=q_1, columns=θ_1)
+G_pd = pd.Series(G, index=q_1)
+C_pd = pd.Series(C, index=θ_1)
+b_pd = pd.Series(b, index=q_1)
+f_pd = pd.Series(f, index=θ_1)
+y_pd = pd.Series(y, index=θ_1)
 
 TC = {"A": A_pd,"G": G_pd,"C": C_pd,"b": b_pd,"f": f_pd,"y": y_pd}
 
 [As, Bs, Cs, Ds, us] = dm4bem.tc2ss(TC)
 
-# step response
-deltaT = 500    # s, imposed time step
 
-uss = np.hstack([b, f])           # input vector for state space
+uss = np.hstack([b_pd, f_pd])           # input vector for state space
 print(f'uss = {uss}')
 
 inv_As = pd.DataFrame(np.linalg.inv(As), columns=As.index, index=As.index)
-yss = (-Cs @ inv_As @ Bs + Ds) @ uss
+
+yss = (-Cs @ inv_As @ Bs + Ds) @ us
+
+# yss = (-Cs @ inv_As @ Bs + Ds) @ us fonctionne mais on veut uss
 
 yss = float(yss.values[0])
 print(f'yss = {yss:.2f} °C')
+print(us)
+
+
+# step response
+deltaT = 500    # s, imposed time step
