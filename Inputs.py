@@ -9,7 +9,7 @@ start_date = '2020-' + start_date
 end_date = '2020-' + end_date
 print(f'{start_date} \tstart date')
 print(f'{end_date} \tend date')
-filename = '../weather_data/FRA_AR_Villard.de.Lans.074840_TMYx.2007-2021.epw'
+filename = 'weather_data/FRA_AR_Villard.de.Lans.074840_TMYx.2007-2021.epw'
 [data, meta] = dm4bem.read_epw(filename, coerce_year=None)
 weather = data[["temp_air", "dir_n_rad", "dif_h_rad"]]
 del data
