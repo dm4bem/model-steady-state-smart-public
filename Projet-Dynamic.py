@@ -355,19 +355,66 @@ TC = {"A": A_pd,"G": G_pd,"C": C_pd,"b": b_pd,"f": f_pd,"y": y_pd}
 [As, Bs, Cs, Ds, us] = dm4bem.tc2ss(TC)
 
 
-uss = np.hstack([b_pd, f_pd])           # input vector for state space
-print(f'uss = {uss}')
+b_non_nul = []
+for i in range(len(b_pd)) :
+    if b_pd[i] != 0 :
+        b_non_nul.append(b_pd[i])
+print(len(b_non_nul))
 
+f_non_nul = []
+for i in range(len(f_pd)) :
+    if f_pd[i] != 0 :
+        f_non_nul.append(f_pd[i])
+print(len(f_non_nul))
+
+f_non_nul_array = np.array(f_non_nul)
+
+b_non_nul_array = np.array(b_non_nul)
+
+# uss = np.hstack([b_non_nul, f_non_nul])           # input vector for state space
+
+# q_2 = [f'q{i}' for i in range(len(f_non_nul))]
+# θ_2 = [f'θ{j}' for j in range(len(b_non_nul))]
+
+# uss_pd = pd.DataFrame(uss, index=q_2, columns=θ_2)
+
+# print(f'uss = {uss}')
+
+# inv_As = pd.DataFrame(np.linalg.inv(As), columns=As.index, index=As.index)
+
+# yss = (-Cs @ inv_As @ Bs + Ds) @ uss
+
+# # yss = (-Cs @ inv_As @ Bs + Ds) @ us fonctionne mais on veut uss
+
+# yss = float(yss.values[0])
+# print(f'yss = {yss:.2f} °C')
+
+uss = np.hstack([b_non_nul_array, f_non_nul_array])  # input vector for state space
+
+print (len (uss))
+print(uss)
+
+# Ensure the shapes match
+uss = uss.reshape(-1, 1)  # Reshape to column vector if necessary
+
+# Fix the indices and columns
+q_2 = [f'q{i}' for i in range(len(uss))]
+θ_2 = [f'θ{i}' for i in range(0,3)]
+
+# Create DataFrame
+uss_pd = pd.DataFrame(uss, index=q_2, columns=θ_2)
+
+print(f'uss = {uss_pd}')
+
+# Inverse of As
 inv_As = pd.DataFrame(np.linalg.inv(As), columns=As.index, index=As.index)
 
-yss = (-Cs @ inv_As @ Bs + Ds) @ us
+# Compute yss
+yss = (-Cs @ inv_As @ Bs + Ds) @ uss
 
-# yss = (-Cs @ inv_As @ Bs + Ds) @ us fonctionne mais on veut uss
-
+# Extract and print the result
 yss = float(yss.values[0])
 print(f'yss = {yss:.2f} °C')
-print(us)
-
 
 # step response
 deltaT = 500    # s, imposed time step
