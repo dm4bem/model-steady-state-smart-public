@@ -427,7 +427,7 @@ time = pd.date_range(start="2000-01-01 00:00:00", periods=n, freq=f"{int(dt)}S")
 
 ToM =  To* np.ones(n)        # outdoor temperature
 Ti_sp = 20 * np.ones(n)     # indoor temperature set point
-Φa = 0 * np.ones(n)         # solar radiation absorbed by the glass
+Φa = α_gSW*S_fenetre*E * np.ones(n)         # solar radiation absorbed by the glass
 Qa = Φo = Φi = Φa           # auxiliary heat sources and solar radiation
 
 data = {'To': ToM, 'Ti_sp': Ti_sp, 'Φo': Φo, 'Φi': Φi, 'Qa': Qa, 'Φa': Φa}
