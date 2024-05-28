@@ -86,10 +86,10 @@ S_g = 9         # m², surface area of glass
 α1_wSW = 0.30    # short wave absortivity: outdoor concrete wall
 
 # Solar radiation absorbed by the outdoor surface of the wall
-Φo = α1 * (S_A_mur_ext + S_B_mur_ext +S_C_mur_ext) * Etot
+Φo = α1_wSW * (S_A_mur_ext + S_B_mur_ext +S_C_mur_ext) * Etot
 
 # Solar radiation absorbed by the indoor surface of the wall
-Φi = τ_gSW * α0 * S_fenetre * Etot
+Φi = τ_gSW * α0_wSW * S_fenetre * Etot
 
 # Solar radiation absorbed by the glass
 Φa = α_gSW * S_fenetre * Etot
