@@ -7,3 +7,5 @@ The objective of this project is to design and study the thermal network of a bu
 We first design the building we want to work with and then realize the corresponding thermal network.
 From there, we manage to identify the components of our matrices which we will then use in the code to solve our problem.
 We started by solving it in steady state before moving on to dynamic state.
+
+The files called "bldg" were test files for the building itself. For the following we used the Steady state file as a ref.
