@@ -386,5 +386,52 @@ yss = float(yss.values[0])
 print(f'yss = {yss:.2f} °C')
 
 
-# step response
-deltaT = 500    # s, imposed time step
+# Eigenvalues analysis
+λ = np.linalg.eig(As)[0]        # eigenvalues of matrix As
+
+# time step
+Δtmax = 2 * min(-1. / λ)    # max time step for stability of Euler explicit
+dm4bem.print_rounded_time('Δtmax', Δtmax)
+
+imposed_time_step = True
+Δt = 500
+
+if imposed_time_step:
+    dt = Δt
+else:
+    dt = dm4bem.round_time(Δtmax)
+dm4bem.print_rounded_time('dt', dt)
+
+# settling time
+t_settle = 4 * max(-1 / λ)
+dm4bem.print_rounded_time('t_settle', t_settle)
+
+# duration: next multiple of 3600 s that is larger than t_settle
+duration = np.ceil(t_settle / 3600) * 3600
+dm4bem.print_rounded_time('duration', duration)
+
+# Create input_data_set
+# ---------------------
+# time vector
+n = int(np.floor(duration / dt))    # number of time steps
+
+# Debug statements to check values
+print(f"Δtmax: {Δtmax}")
+print(f"Rounded dt: {dt}")
+print(f"Settling time: {t_settle}")
+print(f"Duration: {duration}")
+print(f"Number of time steps (n): {n}")
+
+# DateTimeIndex starting at "00:00:00" with a time step of dt
+time = pd.date_range(start="2000-01-01 00:00:00", periods=n, freq=f"{int(dt)}S")
+
+ToM =  To* np.ones(n)        # outdoor temperature
+Ti_sp = 20 * np.ones(n)     # indoor temperature set point
+Φa = 0 * np.ones(n)         # solar radiation absorbed by the glass
+Qa = Φo = Φi = Φa           # auxiliary heat sources and solar radiation
+
+data = {'To': ToM, 'Ti_sp': Ti_sp, 'Φo': Φo, 'Φi': Φi, 'Qa': Qa, 'Φa': Φa}
+input_data_set = pd.DataFrame(data, index=time)
+
+# inputs in time from input_data_set
+u = dm4bem.inputs_in_time(us, input_data_set)
