@@ -66,9 +66,6 @@ hi, ho = 8, 25      # W/(m² K) convection coefficients in, out
 # short-wave solar radiation absorbed by each wall
 E = 200             # W/m²
 
-# outdoor temperature
-To = 5              # °C
-
 # ventilation rate (air-changes per hour)
 ACH_ext = 5             # volume/h fenetre à moitié ouverte
 ACH_int = 0.5             # volume/h porte/fenetre fermée
