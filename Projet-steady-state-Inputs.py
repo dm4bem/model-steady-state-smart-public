@@ -8,6 +8,11 @@ Created on Thu Apr 11 14:38:11 2024
 """
 
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+import dm4bem
+
 
 np.set_printoptions(precision=1)
 
@@ -80,14 +85,88 @@ mAC_dot = L1 * c1 * H * ACH_int / 3600 * ρ
 mBC_dot = L2 * c1 * H * ACH_int / 3600 * ρ
 
 
+# Inputs
+# =========================================================================
 
-# radiative properties
+start_date = '02-01 12:00:00'
+end_date = '02-07 18:00:00'
+
+start_date = '2020-' + start_date
+end_date = '2020-' + end_date
+
+print(f'{start_date} \tstart date')
+print(f'{end_date} \tend date')
+
+# Weather data
+filename = 'weather_data/FRA_AR_Villard.de.Lans.074840_TMYx.2007-2021.epw'
+[data, meta] = dm4bem.read_epw(filename, coerce_year=None)
+weather = data[["temp_air", "dir_n_rad", "dif_h_rad"]]
+del data
+
+# Select weather data from date_start to date_end
+weather.index = weather.index.map(lambda t: t.replace(year=2020))
+weather = weather.loc[start_date:end_date]
+
+# Temperature sources
+# Outdoor air temperature
+Text = weather['temp_air']
+To = Text[0]
+
+# Indoor air temperature set-point
+Ti_day, Ti_night = 20, 16
+Ti_sp = pd.Series(20, index=Text.index)
+Ti_sp = pd.Series(
+    [Ti_day if 6 <= hour <= 22 else Ti_night for hour in Text.index.hour],
+    index=Text.index)
+
+# Flow rate sources
+# Total solar irradiance
+surface_orientation = {'slope': 90,    # 90° is vertical, 90° downward
+                       'azimuth': 0,    # 0° South, positive westward
+                       'latitude': 45}    # °, North Pole 90° positive
+
+albedo = 0.2
+rad_surf = dm4bem.sol_rad_tilt_surf(
+    weather, surface_orientation, albedo) 
+
+Etot = rad_surf.sum(axis=1)
+
+# Radiative properties
 ε_wLW = 0.85    # long wave emmisivity: wall surface (concrete)
 ε_gLW = 0.90    # long wave emmisivity: glass pyrex
-α_wSW = 0.25    # short wave absortivity: white smooth surface
+σ = 5.67e-8     # W/(m²⋅K⁴) Stefan-Bolzmann constant
+
+# Window glass properties
 α_gSW = 0.38    # short wave absortivity: reflective blue glass
 τ_gSW = 0.30    # short wave transmitance: reflective blue glass
-σ = 5.67e-8     # W/(m²⋅K⁴) Stefan-Bolzmann constant
+S_g = 9         # m², surface area of glass
+
+# Outdoor wall properties
+α0_wSW = 0.25    # short wave absortivity: indoor white smooth surface
+α1_wSW = 0.30    # short wave absortivity: outdoor concrete wall
+
+# Solar radiation absorbed by the outdoor surface of the wall
+Φo = α1_wSW * (S_A_mur_ext + S_B_mur_ext +S_C_mur_ext) * Etot
+
+# Solar radiation absorbed by the indoor surface of the wall
+Φi = τ_gSW * α0_wSW * S_fenetre * Etot
+
+# Solar radiation absorbed by the glass
+Φa = α_gSW * S_fenetre * Etot
+
+# Auxiliary (internal) sources
+Qa = 0 * np.ones(weather.shape[0])
+
+# Input data set
+input_data_set = pd.DataFrame({'Text': Text, 'Ti_sp': Ti_sp,
+                               'Φo': Φo, 'Φi': Φi, 'Qa': Qa, 'Φa': Φa,
+                               'Etot': Etot})
+
+print(input_data_set)
+
+print("To =",To)
+
+
 
 
 nq, nθ = 44, 24  # number of flow-rates branches and of temperaure nodes
@@ -294,9 +373,9 @@ C[19] = ρ_window*c_window*2*S_fenetre*L_vitre
 f = np.zeros(A.shape[1])
 
 #solar radiation _ wall
-f[3] = α_wSW*S_A_mur_ext*E
-f[9] = α_wSW*S_B_mur_ext*E
-f[15] = α_wSW*S_C_mur_ext*E
+f[3] = α0_wSW*S_A_mur_ext*E
+f[9] = α0_wSW*S_B_mur_ext*E
+f[15] = α0_wSW*S_C_mur_ext*E
 
 #solar radaition _ glasses
 f[7] = α_gSW*S_fenetre*E
