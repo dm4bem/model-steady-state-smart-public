@@ -103,3 +103,6 @@ input_data_set = pd.DataFrame({'To': To, 'Ti_sp': Ti_sp,
                                'Etot': Etot})
 
 print(input_data_set)
+
+
+print("To =",To[0])
