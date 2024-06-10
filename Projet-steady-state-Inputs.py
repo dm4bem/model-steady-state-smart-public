@@ -363,6 +363,10 @@ C[17] = ρ_insulation*c_insulation*S_C_mur_ext*c2
 C[7] = ρ_window*c_window*S_fenetre*L_vitre
 C[13] = ρ_window*c_window*S_fenetre*L_vitre
 C[19] = ρ_window*c_window*2*S_fenetre*L_vitre
+# C20 ... C22 : Murs internes
+C[20] = ρ_concrete*c_concrete*(S_AB*c1+S_AC*L1)
+C[21] = ρ_concrete*c_concrete*(S_AB*c1+S_BC*L2)
+C[22] = ρ_concrete*c_concrete*(S_AC*L1+S_BC*L2)
 
 
 # Vector of flow-rate sources
